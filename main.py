@@ -17,6 +17,7 @@ flags.DEFINE_integer("batch_size", 512, "Batch size [512]")
 flags.DEFINE_integer("batch_logging_step", 100, "Logging step for batch [100]")
 flags.DEFINE_integer("epoch_logging_step", 1, "Logging step for epoch [1]")  # Need?
 
+flags.DEFINE_integer("input_dim", 24000, "Dimension of input [24000]")
 flags.DEFINE_string("ae_h_dim_list", "[2048]", "List of AE dimensions [2048]")
 flags.DEFINE_integer("z_dim", 128, "Dimension of z [128]")
 flags.DEFINE_string("dis_h_dim_list", "[2048]", "List of Discriminator dimension [2048]")
@@ -51,25 +52,27 @@ def main(_):
                  ']_ae' + FLAGS.ae_h_dim_list + '_z[' + str(FLAGS.z_dim) +  ']_dis' + FLAGS.dis_h_dim_list
     logger.info(file_name)
 
-
-    ### ===== Build model ===== ###
-    if FLAGS.model == "AE":
-        #logger.info("Build AE model")
-        model = AE(logger)
-
-    elif FLAGS.model == "VAE":
-        logger.info("Build VAE model")
-
-    elif FLAGS.model == "VAE_GAN":
-        logger.info("Build VAE_GAN model")
-
-
-    ### ===== Train/Test =====###
     with tf.device('/gpu:%d' % FLAGS.gpu_id):
+        ### ===== Build model ===== ###
+        if FLAGS.model == "AE":
+            logger.info("Build AE model")
+            model = AE(logger, FLAGS.learning_rate, FLAGS.input_dim, FLAGS.z_dim, eval(FLAGS.ae_h_dim_list))
+
+        elif FLAGS.model == "VAE":
+            logger.info("Build VAE model")
+
+        elif FLAGS.model == "VAE_GAN":
+            logger.info("Build VAE_GAN model")
+
+
+        ### ===== Train/Test =====###
+
         if FLAGS.is_train:
-            logger.info("Start training")
+            #logger.info("Start training")
             train_data = load_data(os.path.join(FLAGS.data_dir, 'train_data.npy'))
             val_data = load_data(os.path.join(FLAGS.data_dir, 'val_data.npy'))
+            #print(train_data.shape)
+            model.train(train_data, FLAGS.batch_size)
         else:
             logger.info("Start testing")
             test_data = load_data(os.path.join(FLAGS.data_dir, 'test_data.npy'))

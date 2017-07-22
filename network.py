@@ -21,11 +21,16 @@ def lrelu(x, leak=0.2, name='lrelu'):
         f2 = 0.5 * (1 - leak)
         return f1 * x + f2 * abs(x)
 
+# todo: get activation type from parameter
 class BasicNet():
-    theta = []
-    layer_dims = []
+    #theta = []
+    #layer_dims = []
 
     def __init__(self, layer_dims):
+        """
+
+        :param layer_dims: List of layer dimension (length = num_weights + 1)
+        """
         self.layer_dims = layer_dims
         self.weights, self.biases = set_fc_layer(self.layer_dims)
         self.theta = [*self.weights, *self.biases]
